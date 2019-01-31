@@ -16,25 +16,32 @@ public class Main {
         String value = jedis.get("foo");
 
         System.out.println(value);
+        System.out.println("Redis is running...");
+
+        System.out.println("Welcome to ScreenShot Service.");
 
         //todo: Solve duplicate weblink case later to optimize execution time. Idea: Multilayer Bloom Filter
         read_seed_list();
 
+        //case: no weblink in the file
+        //case: only 1 link in the file
+        //case: small amount of links in the file
+        //case: huge amount of links in the file
         if (seed_list.size()<4000){
             for (String link: seed_list){
                 //getImg("https://google.com");
                 getImg(link);
 
-                //Store in a DB or HashMap
+                //Store in a DB or HashMap or Arraylist
             }
         }
 
         System.out.println("Operation done, All screenshot taken and saved in img folder");
-        System.out.println("fd");
+        System.out.println("You can search the screen shot by typing the full url here.(e.g. https://google.com)");
 
     }
 
-    public static void getImg(String weblink) throws Exception{
+    private static void getImg(String weblink) throws Exception{
         URL url = new URL(String.format("%s?access_key=%s&url=%s", APIFLASH_ENDPOINT, ACCESS_KEY, weblink));
         InputStream inputStream = url.openStream();
 
