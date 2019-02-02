@@ -42,7 +42,7 @@ git clone https://github.com/Ghoul-SSZ/ScreenshotService.git
 Now you can start to use the Screenshot Service
 
 ## How to use
-To tell the java program what websites you want to take a screenshot for. Locate and edit the seed-list.csv file.(note. one url per line). If you wish to change the file location. It is located in a private method in Main.java  
+To tell the java program what websites you want to take a screenshot of. Locate and edit the seed-list.csv file.(note. one url per line). If you wish to change the file location. It is located in a private method in Main.java  
 
 ```java
 private static void read_seed_list(){
