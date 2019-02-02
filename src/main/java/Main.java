@@ -3,6 +3,8 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
@@ -59,17 +61,43 @@ public class Main {
             String search_key = sc.next();
             String file_location = jedis.get(search_key);
 
+            System.out.println(file_location);
+
+            String canonicalPath = new File(".").getCanonicalPath();
             //loading img to client
-            BufferedImage img = null;
-            try {
-                img = ImageIO.read(new File(file_location));
-            } catch (IOException e) {
-            }
+
+            img_viewer(file_location);
+
 
             //next search begins
             System.out.println("You can search the screen shot by typing the full url here.(e.g. https://google.com)");
         }
 
+    }
+
+    private static void img_viewer(final String img_path){
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                JFrame frame = new JFrame("Image viewer");
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                BufferedImage img = null;
+
+                try {
+                    img = ImageIO.read(new File(img_path));
+                }catch (IOException e){
+                    e.printStackTrace();
+                    System.exit(1);
+                }
+
+                ImageIcon imgIcon = new ImageIcon(img);
+                JLabel lbl = new JLabel();
+                lbl.setIcon(imgIcon);
+                frame.getContentPane().add(lbl,BorderLayout.CENTER);
+                frame.pack();
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
+            }
+        });
     }
 
     private static String filePath(String link){
@@ -108,7 +136,7 @@ public class Main {
     }
 
     //Convert the text file into an Arraylist for further processing
-    
+
     private static void read_seed_list(){
         String filename = "seed-list.csv";
         try{
