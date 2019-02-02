@@ -33,7 +33,7 @@ $ redis-cli ping
 PONG
 ```
 
-Once the server is up and running you can then proceed to clone can run the project
+Once the server is up and running you can then proceed to clone and run the project
 
 ```bash
 git clone https://github.com/Ghoul-SSZ/ScreenshotService.git
