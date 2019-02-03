@@ -52,20 +52,17 @@ private static void read_seed_list(){
 
 ```
 ### How this solution should be scaled to handle up to 1 000 000 screenshots per day as an enterprise infrastructure component.
-The program can be restructured into a main Class and a Worker Class. 
+The program is structured into a main Class and a Worker Class. 
 
-Main Class only handle the csv file and put all the web-links in an Arraylist, and then assign the tasks to the Workers using a Java multi-tread pool(one worker is given one web-link at a time), and finally inform user that all screenshot have be taken and allow the user to do query and serve the image to the user. 
+Main Class only handle the csv file and put all the web-links in an Arraylist, and then assign the tasks to the Workers using a Java multi-tread pool(one worker is given one web-link at a time to work with), and finally inform user that all screenshot have be taken and allow the user to do query and serve the image to the user. 
 
-The Worker Class will then check whether we have done the screenshot already using a Multi-Layered Bloom Filter, which will tell us the answer in O(1) time instead of having to ask the Redis database. If we haven't done a screenshot, then the worker will do the getImg() operation to get a screenshot from the specific web-link. It will then store the image in a folder(This could be improved later on) in hard-disk,  and store the image file path as a key value pair( key=web-link , value = file path ) into the Redis Database. This is done to prevent the Database size from getting too large.  
+The Worker Class will check whether we have done the screenshot already by checking our Redis database(Here we can try to use a Multi-Layered Bloom Filter instead, which will tell us the answer in O(1) time instead of having to ask the Redis database). If we haven't done a screenshot, then the worker will get a screenshot from the specific web-link. It will then store the image in a folder(This could be improved later on) in hard-disk,  and store the image file path as a key value pair( key=web-link , value = file path ) into the Redis Database. This is done to prevent the Database size from getting too large.  
 
 The amount of worker active can be configured based on the hardware specifications, theoretically the more core it has, the more worker you can set to be active at the same time. Thus make this program more scale-able. (Up to a limit of course :) , but 1 000 000 per day is no problem at all )
 
-
 ## Limitation and Ideas for further improvement
-1. Prepare it for multi-treading 
-2. Add Multi-Layer Bloom Filter(MLBF). Redis is fast, but MLBF is definitely faster.   
-3. Add functionality to allow user to add more web-links to get screenshot without having to quit the program and modify the csv file. 
-    
+1. Add Multi-Layer Bloom Filter(MLBF). Redis is fast, but MLBF is definitely faster.   
+2. Add functionality to allow user to add more web-links to get screenshot without having to quit the program and modify the csv file. 
     
 
 ## Contributing

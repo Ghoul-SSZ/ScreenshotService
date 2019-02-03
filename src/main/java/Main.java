@@ -28,7 +28,7 @@ public class Main {
 
         System.out.println("Welcome to ScreenShot Service.");
 
-        //todo: Solve duplicate weblink case later to optimize execution time. Idea: Multilayer Bloom Filter
+        //TODO: Solve duplicate weblink case using Multilayer Bloom Filter to optimize execution time.
         read_seed_list();
 
         //case: no weblink in the file -> param checked
@@ -41,12 +41,11 @@ public class Main {
             for (String link: seed_list){
                 //getImg("https://google.com");  //testing the getImg function as well as the screenshot API
 
-                //Get Image and Store in redis date base
-                //Redis will gladly accept anything you throw at it since strings are binary safe. so technically i can store image in the data base
-                // but i didn't want to store the img directly in order to prevent the redis db size gets too big
                 Jedis jedis = pool.getResource();
 
-                //getImg(link, jedis);
+                //Get Image and Store in redis date base using Workers
+                //Redis will gladly accept anything you throw at it since strings are binary safe. so technically i can store image in the data base
+                // but i didn't want to store the img directly in order to prevent the redis db size gets too big
                 regulator.submit(new Worker(link,jedis));
 
             }
