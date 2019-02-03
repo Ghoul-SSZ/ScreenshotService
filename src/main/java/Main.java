@@ -7,17 +7,19 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 
 
     private static ArrayList <String> seed_list = new ArrayList<String>();
     private static JedisPool pool = new JedisPool(new JedisPoolConfig(), "localhost");
+    // Setting the max amount of thread is allowed to be active at the same time
+    // This can be set to other int based on the hardware specification fo the datacenter
     private static int num_of_workers=4;
 
     public static void main(String[] args) throws Exception {
@@ -49,6 +51,14 @@ public class Main {
 
             }
             regulator.shutdown();
+            try {
+                if (!regulator.awaitTermination(800, TimeUnit.SECONDS)){
+                    regulator.shutdownNow();
+                }
+            }catch (InterruptedException e){
+                regulator.shutdownNow();
+            }
+
         }else {
             System.out.println("There are no link in the seed-list.csv file. Time to add some and run the program");
             System.exit(1);

@@ -33,7 +33,7 @@ public class Worker implements Runnable {
 
                 String fileName = filePath(link);
 
-                System.out.println("image found in" + fileName);
+                System.out.println("image captured, saving it in: " + fileName);
                 OutputStream outputStream = new FileOutputStream(fileName);
 
                 byte[] b = new byte[2048];
