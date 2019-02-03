@@ -20,12 +20,6 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        //testing Jedis
-        //Jedis jedis = new Jedis("localhost");
-        //jedis.set("foo", "bar");
-        //String value = jedis.get("foo");
-
-        //System.out.println(value);
         System.out.println("Redis is running...");
 
         System.out.println("Welcome to ScreenShot Service.");
@@ -35,17 +29,18 @@ public class Main {
 
         //case: no weblink in the file -> param checked
         //case: small amount of links in the file -> inside if statement. number is set to 4000 but can obviously get larger
-        //case: huge amount of links in the file ->
+        //case: huge amount of links in the file -> answer is multi-treading
 
         //NOTE: This if statement is the part where we can put into a worker class to multi-thread in the future
         if (seed_list.size()<4000 && !seed_list.isEmpty()){
             for (String link: seed_list){
                 //getImg("https://google.com");  //testing the getImg function as well as the screenshot API
 
-                //Get Image and Store in a DB or HashMap or Arraylist
-                //Redis will gladly accept anything you throw at it since strings are binary safe.
+                //Get Image and Store in redis date base
+                //Redis will gladly accept anything you throw at it since strings are binary safe. so technically i can store image in the data base
                 // but i didn't want to store the img directly in order to prevent the redis db size gets too big
                 Jedis jedis = pool.getResource();
+
                 getImg(link, jedis);
 
             }
@@ -57,20 +52,31 @@ public class Main {
         System.out.println("You can search the screen shot by typing the full url here.(e.g. https://google.com)");
         Scanner sc = new Scanner(System.in);
 
-        while (true) {
+        boolean flag = true;
+
+        while (flag) {
             String search_key = sc.next();
-            String file_location = jedis.get(search_key);
 
-            System.out.println(file_location);
+            if (search_key.matches("exit") ){
+                //Terminate service
+                System.out.println("Thank you for using the service!");
+                System.exit(1);
 
-            String canonicalPath = new File(".").getCanonicalPath();
-            //loading img to client
+            }else {
+                String file_location = jedis.get(search_key);
 
-            img_viewer(file_location);
+                System.out.println(file_location);
+
+                //String canonicalPath = new File(".").getCanonicalPath();
+
+                //loading img and show it to client
+                img_viewer(file_location);
 
 
-            //next search begins
-            System.out.println("You can search the screen shot by typing the full url here.(e.g. https://google.com)");
+                //next search begins
+                System.out.println("You can search the screen shot by typing the full url here.(e.g. https://google.com) If you want to stop the search, type 'exit' ");
+            }
+
         }
 
     }
@@ -79,7 +85,7 @@ public class Main {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 JFrame frame = new JFrame("Image viewer");
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
                 BufferedImage img = null;
 
                 try {
@@ -117,7 +123,7 @@ public class Main {
 
             String fileName = filePath(weblink);
 
-            System.out.println(fileName);
+            System.out.println("image found in" + fileName);
             OutputStream outputStream = new FileOutputStream(fileName);
 
             byte[] b = new byte[2048];
