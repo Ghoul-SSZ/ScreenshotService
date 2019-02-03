@@ -61,7 +61,11 @@ The Worker Class will then check whether we have done the screenshot already usi
 The amount of worker active can be configured based on the hardware specifications, theoretically the more core it has, the more worker you can set to be active at the same time. Thus make this program more scale-able. (Up to a limit of course :) , but 1 000 000 per day is no problem at all )
 
 
-
+## Limitation and Ideas for further improvement
+1. Prepare it for multi-treading 
+2. Add Multi-Layer Bloom Filter(MLBF). Redis is fast, but MLBF is definitely faster.   
+3. Add functionality to allow user to add more web-links to get screenshot without having to quit the program and modify the csv file. 
+    
     
 
 ## Contributing
