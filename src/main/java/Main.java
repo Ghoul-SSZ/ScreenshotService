@@ -10,13 +10,15 @@ import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
 
-    private static String ACCESS_KEY = "1d46c99540d44ac2a49a4b8b8bfec739";
-    private static String APIFLASH_ENDPOINT = "https://api.apiflash.com/v1/urltoimage";
+
     private static ArrayList <String> seed_list = new ArrayList<String>();
     private static JedisPool pool = new JedisPool(new JedisPoolConfig(), "localhost");
+    private static int num_of_workers=4;
 
     public static void main(String[] args) throws Exception {
 
@@ -30,9 +32,10 @@ public class Main {
         //case: no weblink in the file -> param checked
         //case: small amount of links in the file -> inside if statement. number is set to 4000 but can obviously get larger
         //case: huge amount of links in the file -> answer is multi-treading
+        ExecutorService regulator = Executors.newFixedThreadPool(num_of_workers);
 
         //NOTE: This if statement is the part where we can put into a worker class to multi-thread in the future
-        if (seed_list.size()<4000 && !seed_list.isEmpty()){
+        if ( !seed_list.isEmpty()){
             for (String link: seed_list){
                 //getImg("https://google.com");  //testing the getImg function as well as the screenshot API
 
@@ -41,9 +44,14 @@ public class Main {
                 // but i didn't want to store the img directly in order to prevent the redis db size gets too big
                 Jedis jedis = pool.getResource();
 
-                getImg(link, jedis);
+                //getImg(link, jedis);
+                regulator.submit(new Worker(link,jedis));
 
             }
+            regulator.shutdown();
+        }else {
+            System.out.println("There are no link in the seed-list.csv file. Time to add some and run the program");
+            System.exit(1);
         }
 
         System.out.println("Operation done, All screenshot taken and saved in img folder");
@@ -52,9 +60,8 @@ public class Main {
         System.out.println("You can search the screen shot by typing the full url here.(e.g. https://google.com)");
         Scanner sc = new Scanner(System.in);
 
-        boolean flag = true;
 
-        while (flag) {
+        while (true) {
             String search_key = sc.next();
 
             if (search_key.matches("exit") ){
@@ -104,41 +111,6 @@ public class Main {
                 frame.setVisible(true);
             }
         });
-    }
-
-    private static String filePath(String link){
-        String parsedWeblink = link.replaceAll("https://","");
-        String fileName = String.format("imgs/%s.jpeg", parsedWeblink.replaceAll("/","_"));
-        return fileName;
-    }
-
-    private static void getImg(String weblink, Jedis jedis) throws Exception{
-
-        // if key doesn't not exist, we don't have the img in our database.  time to get it
-        // otherwise we don't need to do any action.
-        if (!jedis.exists(weblink)) {
-
-            URL url = new URL(String.format("%s?access_key=%s&url=%s", APIFLASH_ENDPOINT, ACCESS_KEY, weblink));
-            InputStream inputStream = url.openStream();
-
-            String fileName = filePath(weblink);
-
-            System.out.println("image found in" + fileName);
-            OutputStream outputStream = new FileOutputStream(fileName);
-
-            byte[] b = new byte[2048];
-            int length;
-
-            while ((length = inputStream.read(b)) != -1) {
-                outputStream.write(b, 0, length);
-            }
-
-            inputStream.close();
-            outputStream.close();
-
-            jedis.set(weblink, filePath(weblink));
-
-        }
     }
 
     //Convert the text file into an Arraylist for further processing
